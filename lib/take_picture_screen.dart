@@ -1,8 +1,8 @@
 import 'dart:io';
+import 'dart:math' as math; // Import math for calculations
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:sudoku_solver_android/camera_service.dart';
-import 'dart:math' as math;
 
 class TakePictureScreen extends StatefulWidget {
   const TakePictureScreen({
@@ -18,7 +18,7 @@ class TakePictureScreen extends StatefulWidget {
 
 class TakePictureScreenState extends State<TakePictureScreen> {
   late CameraService _cameraService;
-  final int _gridLines = 8;
+  final int _gridLines = 9; // 9x9 grid
 
   @override
   void initState() {
@@ -33,6 +33,38 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     super.dispose();
   }
 
+  /// Builds a cropped square camera preview
+  Widget buildCroppedCameraPreview(CameraController controller) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Use the smaller side of the screen to define the square size
+        final double squareSize = math.min(constraints.maxWidth, constraints.maxHeight);
+
+        return ClipRect(
+          child: SizedBox(
+            width: squareSize,
+            height: squareSize,
+            child: OverflowBox(
+              alignment: Alignment.center,
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: Transform.rotate(
+                  angle: math.pi / 2, // Rotate 90 degrees clockwise
+                  child: SizedBox(
+                    width: squareSize,
+                    height: squareSize / controller.value.aspectRatio,
+                    child: CameraPreview(controller),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,82 +74,73 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       ),
       backgroundColor: Colors.green[900],
       body: Center(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            FutureBuilder<void>(
-              future: _cameraService.getInitializationFuture(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return Transform.rotate(
-                    angle: math.pi / 2,
-                    child: AspectRatio(
-                      aspectRatio: _cameraService.getController().value.aspectRatio,
-                      child: CameraPreview(_cameraService.getController()),
-                    ),
-                  );
-                } else {
-                  return const Center(
-                      child: CircularProgressIndicator(color: Colors.green));
-                }
-              },
-            ),
-            FutureBuilder<void>(
-                future: _cameraService.getInitializationFuture(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return Transform.rotate(
-                      angle: math.pi / 2,
-                      child: LayoutBuilder(
-                          builder: (context, constraints){
-                            return  AspectRatio(
-                                aspectRatio: _cameraService.getController().value.aspectRatio,
-                                child: CustomPaint(
-                                    painter: GridPainter(
-                                      gridLines: _gridLines,
-                                      color: Colors.green.withOpacity(0.4),
-                                    )
-                                )
-                            );
-                          }
-                      ),
-                    );
-                  } else {
-                    return const SizedBox();
-                  }
-                }
-            ),
-          ],
+        child: FutureBuilder<void>(
+          future: _cameraService.getInitializationFuture(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              final controller = _cameraService.getController();
+
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Cropped camera preview
+                  buildCroppedCameraPreview(controller),
+
+                  // Grid overlay on top of the preview
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final double squareSize = math.min(constraints.maxWidth, constraints.maxHeight);
+                      return SizedBox(
+                        width: squareSize,
+                        height: squareSize,
+                        child: CustomPaint(
+                          painter: GridPainter(
+                            gridLines: _gridLines,
+                            color: Colors.green.withOpacity(0.6),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            } else {
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.green),
+              );
+            }
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            try {
-              final image = await _cameraService.takePicture();
-              if (!context.mounted) return;
+        onPressed: () async {
+          try {
+            final image = await _cameraService.takePicture();
+            if (!context.mounted) return;
 
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => DisplayPictureScreen(
-                    imagePath: image.path,
-                  ),
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => DisplayPictureScreen(
+                  imagePath: image.path,
                 ),
-              );
-            } catch (e) {
-              print(e);
-            }
-          },
-          backgroundColor: Colors.green,
-          child: const Icon(Icons.camera_alt, color: Colors.white)),
+              ),
+            );
+          } catch (e) {
+            print(e);
+          }
+        },
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.camera_alt, color: Colors.white),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
 
-// Custom painter class for drawing grid lines
+// GridPainter: Draws the grid on the camera preview
 class GridPainter extends CustomPainter {
-  final int gridLines;
-  final Color color;
+  final int gridLines; // Number of grid lines (e.g., 9x9 grid)
+  final Color color; // Grid color
 
   GridPainter({required this.gridLines, required this.color});
 
@@ -125,28 +148,28 @@ class GridPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 1.0;
+      ..strokeWidth = 1.5;
 
-    // Draw horizontal lines
-    for (int i = 1; i <= gridLines; i++) {
-      final double y = size.height * i / (gridLines + 1);
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
+    final cellSize = size.width / gridLines;
 
     // Draw vertical lines
-    for (int i = 1; i <= gridLines; i++) {
-      final double x = size.width * i / (gridLines + 1);
+    for (int i = 1; i < gridLines; i++) {
+      final x = i * cellSize;
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+
+    // Draw horizontal lines
+    for (int i = 1; i < gridLines; i++) {
+      final y = i * cellSize;
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// A widget that displays the picture taken by the user.
+// DisplayPictureScreen: Displays the captured image
 class DisplayPictureScreen extends StatelessWidget {
   final String imagePath;
 
@@ -155,10 +178,7 @@ class DisplayPictureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: const Text('Picture taken'),
-          backgroundColor: Colors.red
-      ),
+      appBar: AppBar(title: const Text('Display the Picture')),
       body: Image.file(File(imagePath)),
     );
   }
