@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'camera_page.dart'; // Import the camera page
+import 'package:sudoku_solver_android/take_picture_screen.dart';
+import 'camera_service.dart'; // Import the camera page
 
 Future<void> main() async {
   // Ensure that plugin services are initialized so that `availableCameras()` can be called before `runApp()`
