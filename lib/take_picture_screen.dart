@@ -3,6 +3,8 @@ import 'dart:math' as math; // Import math for calculations
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:sudoku_solver_android/camera_service.dart';
+import 'package:http/http.dart' as http; // Add this import
+import 'dart:convert';
 
 class TakePictureScreen extends StatefulWidget {
   const TakePictureScreen({
@@ -62,6 +64,27 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         );
       },
     );
+  }
+
+  Future<void> sendImageToServer(String imagePath) async {
+    try {
+      final url = Uri.parse('https://sudoku-solver-app-v0gc.onrender.com/process-image'); // Replace with your FastAPI server's URL
+
+      final request = http.MultipartRequest('POST', url)
+        ..files.add(await http.MultipartFile.fromPath('file', imagePath));
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final responseData = await response.stream.bytesToString();
+        final decodedData = json.decode(responseData);
+        print("Response from server: $decodedData");
+      } else {
+        print("Failed to upload image: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error uploading image: $e");
+    }
   }
 
 
@@ -127,6 +150,25 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             );
           } catch (e) {
             print(e);
+          }
+
+          try {
+            final image = await _cameraService.takePicture();
+            if (!context.mounted) return;
+
+            // Send the image to the server
+            await sendImageToServer(image.path);
+
+            // Navigate to the display picture screen
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => DisplayPictureScreen(
+                  imagePath: image.path,
+                  ),
+                ),
+              );
+            } catch (e) {
+          print(e);
           }
         },
         backgroundColor: Colors.green,
