@@ -5,7 +5,7 @@ import 'package:sudoku_solver_android/camera_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:math' as math;
-
+import 'solution_screen.dart';
 import 'camera_design.dart'; // Import the design file
 
 class TakePictureScreen extends StatefulWidget {
@@ -37,7 +37,31 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     super.dispose();
   }
 
-  Future<void> sendImageToServer(String imagePath) async {
+  // Assuming you receive the server response as a Map<String, dynamic>
+  void handleServerResponse(BuildContext context, Map<String, dynamic> response) {
+    if (response.containsKey('solution')) {
+      // Parse the solution
+      final solutionString = response['solution'] as String;
+      final solutionList = solutionString
+          .split(',')
+          .map((e) => int.parse(e.trim()))
+          .toList();
+
+      // Navigate to the SolutionScreen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => SolutionScreen(solution: solutionList),
+        ),
+      );
+    } else {
+      // Handle error or unexpected response
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to load solution')),
+      );
+    }
+  }
+
+  Future<void> sendImageToServer(String imagePath, BuildContext context) async {
     try {
       final url = Uri.parse('https://sudoku-solver-app-v0gc.onrender.com/process-image'); // Replace with your server URL
 
@@ -50,11 +74,20 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         final responseData = await response.stream.bytesToString();
         final decodedData = json.decode(responseData);
         print("Response from server: $decodedData");
+
+        // Navigate to the SolutionScreen
+        handleServerResponse(context, decodedData);
       } else {
         print("Failed to upload image: ${response.statusCode}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response.statusCode}')),
+        );
       }
     } catch (e) {
       print("Error uploading image: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to send the image.')),
+      );
     }
   }
 
@@ -65,6 +98,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         title: const Text('Picture of Your Sudoku'),
         backgroundColor: Colors.blueGrey,
       ),
+      backgroundColor: Colors.indigoAccent,
       body: Center(
         child: FutureBuilder<void>(
           future: _cameraService.getInitializationFuture(),
@@ -89,30 +123,25 @@ class TakePictureScreenState extends State<TakePictureScreen> {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          try {
-            final image = await _cameraService.takePicture();
-            if (!context.mounted) return;
+    floatingActionButton: FloatingActionButton(
+    onPressed: () async {
+    try {
+    final image = await _cameraService.takePicture();
+    if (!context.mounted) return;
 
-            // Send the image to the server
-            await sendImageToServer(image.path);
-
-            // Navigate to the display picture screen
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => DisplayPictureScreen(
-                  imagePath: image.path,
-                ),
-              ),
-            );
-          } catch (e) {
-            print(e);
-          }
-        },
-        backgroundColor: Colors.yellow,
-        child: const Icon(Icons.camera_alt, color: Colors.black),
-      ),
+    // Send the image to the server and navigate to SolutionScreen
+    await sendImageToServer(image.path, context);
+    } catch (e) {
+    print(e);
+    ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Failed to take a picture.')),
+    );
+    }
+    },
+    backgroundColor: Colors.yellowAccent,
+    child: const Icon(Icons.camera_alt, color: Colors.black),
+    ),
+      // Center the button at the bottom
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }

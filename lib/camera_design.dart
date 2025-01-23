@@ -17,74 +17,74 @@ class CameraDesign extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.indigo, // Blue background
+      color: Colors.indigoAccent, // Blue background
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center, // Center content vertically
         children: [
-
-          // Centered yellow text
-          Expanded(
-            flex: 1, // Takes up proportional space above the camera preview
-            child: Center(
-              child: const Text(
-                "Let's see your solution...",
-                style: TextStyle(
-                  color: Colors.yellow,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-
           // Camera preview with grid overlay and yellow borders
-          Expanded(
-            flex: 3, // Takes up proportional space for the camera preview
-            child: Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.yellow, // Yellow border
-                    width: 4, // Border thickness
+          Center(
+            child: Column(
+              children: [
+                // Add the text directly above the camera preview
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 10.0),
+                  child: Text(
+                    "Try Me With a (Hard) Sudoku ;)",
+                    style: TextStyle(
+                      color: Colors.yellowAccent,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Cropped camera preview
-                    ClipRect(
-                      child: SizedBox(
-                        width: squareSize,
-                        height: squareSize,
-                        child: OverflowBox(
-                          alignment: Alignment.center,
-                          child: FittedBox(
-                            fit: BoxFit.cover,
-                            child: Transform.rotate(
-                              angle: math.pi / 2, // Rotate 90 degrees clockwise
-                              child: SizedBox(
-                                width: squareSize,
-                                height:
-                                squareSize / controller.value.aspectRatio,
-                                child: CameraPreview(controller),
+
+                // Camera preview
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.yellowAccent, // Yellow border
+                      width: 4, // Border thickness
+                    ),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Cropped camera preview
+                      ClipRect(
+                        child: SizedBox(
+                          width: squareSize,
+                          height: squareSize,
+                          child: OverflowBox(
+                            alignment: Alignment.center,
+                            child: FittedBox(
+                              fit: BoxFit.cover,
+                              child: Transform.rotate(
+                                angle: math.pi / 2, // Rotate 90 degrees clockwise
+                                child: SizedBox(
+                                  width: squareSize,
+                                  height: squareSize /
+                                      controller.value.aspectRatio,
+                                  child: CameraPreview(controller),
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
 
-                    // Grid overlay
-                    CustomPaint(
-                      size: Size(squareSize, squareSize),
-                      painter: GridPainter(
-                        gridLines: gridLines,
-                        color: Colors.yellow.withOpacity(0.8), // Yellow grid
+                      // Grid overlay
+                      CustomPaint(
+                        size: Size(squareSize, squareSize),
+                        painter: GridPainter(
+                          gridLines: gridLines,
+                          color: Colors.yellow.withOpacity(0.8), // Yellow grid
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
 
