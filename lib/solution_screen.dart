@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SolutionScreen extends StatelessWidget {
-  final List<int> solution;
+  final List<dynamic> solution;
 
   const SolutionScreen({Key? key, required this.solution}) : super(key: key);
 
