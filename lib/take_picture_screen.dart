@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:math' as math;
 import 'edit_digits_page.dart';
-import 'solution_screen.dart';
 import 'camera_design.dart'; // Import the design file
 
 class TakePictureScreen extends StatefulWidget {
@@ -86,10 +85,15 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Picture of Your Sudoku'),
-        backgroundColor: Colors.blueGrey,
+        title: Text(
+          'Picture of Your Sudoku',
+          style: TextStyle(
+          color: Colors.black, // Black text color
+        ),
+        ),
+        backgroundColor: Theme.of(context).cardColor, // csrdColor
       ),
-      backgroundColor: Colors.indigoAccent,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // Beige
       body: Center(
         child: FutureBuilder<void>(
           future: _cameraService.getInitializationFuture(),
@@ -98,9 +102,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
               final controller = _cameraService.getController();
               return LayoutBuilder(
                 builder: (context, constraints) {
-                  // Use the smaller side of the screen to define the square size
                   final double squareSize = math.min(constraints.maxWidth, constraints.maxHeight);
-
                   return CameraDesign(
                     squareSize: squareSize,
                     controller: controller,
@@ -109,53 +111,34 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                 },
               );
             } else {
-              return const CircularProgressIndicator(color: Colors.blue);
+              return CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.secondary, // Yellow
+              );
             }
           },
         ),
       ),
-    floatingActionButton: FloatingActionButton(
-    onPressed: () async {
-    try {
-    final image = await _cameraService.takePicture();
-    if (!context.mounted) return;
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          try {
+            final image = await _cameraService.takePicture();
+            if (!context.mounted) return;
 
-    // Send the image to the server and navigate to SolutionScreen
-    await sendImageToServer(image.path, context);
-    } catch (e) {
-    print(e);
-    ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Failed to take a picture.')),
-    );
-    }
-    },
-    backgroundColor: Colors.yellowAccent,
-    child: const Icon(Icons.camera_alt, color: Colors.black),
-    ),
-      // Center the button at the bottom
+            // Send the image to the server and navigate to SolutionScreen
+            await sendImageToServer(image.path, context);
+          } catch (e) {
+            print(e);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Failed to take a picture.')),
+            );
+          }
+        },
+        backgroundColor: Theme.of(context).colorScheme.secondary, // Yellow
+        child: const Icon(Icons.camera_alt, color: Colors.black),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
-
-class DisplayPictureScreen extends StatelessWidget {
-  final String imagePath;
-
-  const DisplayPictureScreen({super.key, required this.imagePath});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Display the Picture'),
-        backgroundColor: Colors.blue,
-      ),
-      body: Center(
-        child: Image.file(File(imagePath)),
-      ),
-    );
-  }
-}
-
 
 

@@ -22,36 +22,53 @@ class _EditDigitsPageState extends State<EditDigitsPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Recognized Digits'),
-      ),
-      body: Column(
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Edit Recognized Digits'),
+      backgroundColor: Theme.of(context).cardColor, // Update app bar to match the theme
+    ),
+    body: Center( // Center the content inside the body
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center, // Center vertically
         children: [
+          // Centered GridView
           Expanded(
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 9,
+                crossAxisCount: 9, // 9 columns in the grid
                 childAspectRatio: 1,
               ),
               itemCount: 81,
               itemBuilder: (context, index) {
-                return TextFormField(
-                  initialValue: updatedDigits[index].toString(),
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.number,
-                  maxLength: 1,
-                  decoration: const InputDecoration(
-                    counterText: '', // Remove counter
-                    border: OutlineInputBorder(),
+                return Container(
+                  margin: const EdgeInsets.all(2.0), // Optional, to separate the cells slightly
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor.withOpacity(0.65), // Yellow background for grid
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.secondary, // Yellow border for each cell
+                      width: 1,
+                    ),
                   ),
-                  onChanged: (value) {
-                    // Update the digit if valid
-                    if (RegExp(r'^[1-9]$').hasMatch(value)) {
-                      updatedDigits[index] = int.parse(value);
-                    }
-                  },
+                  child: TextFormField(
+                    initialValue: updatedDigits[index].toString(),
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.number,
+                    maxLength: 1,
+                    style: TextStyle(
+                      color: Colors.black, // Text color for digits
+                    ),
+                    decoration: const InputDecoration(
+                      counterText: '', // Remove counter
+                      border: InputBorder.none, // Remove the border for each TextFormField
+                    ),
+                    onChanged: (value) {
+                      // Update the digit if valid
+                      if (RegExp(r'^[1-9]$').hasMatch(value)) {
+                        updatedDigits[index] = int.parse(value);
+                      }
+                    },
+                  ),
                 );
               },
             ),
@@ -62,11 +79,17 @@ class _EditDigitsPageState extends State<EditDigitsPage> {
               sendDigitsToServer(updatedDigits, context);
             },
             child: const Text('Submit Corrections'),
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.black, 
+              backgroundColor: Theme.of(context).colorScheme.secondary, // Button text color
+            ),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Future<void> sendDigitsToServer(List<int> correctedDigits,
       BuildContext context) async {

@@ -14,10 +14,10 @@ class CameraDesign extends StatelessWidget {
     required this.gridLines,
   });
 
-  @override
+ @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.indigoAccent, // Blue background
+      //color: Theme.of(context).scaffoldBackgroundColor, // Beige background color (or use your theme color)
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center, // Center content vertically
         children: [
@@ -26,14 +26,15 @@ class CameraDesign extends StatelessWidget {
             child: Column(
               children: [
                 // Add the text directly above the camera preview
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 10.0),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10.0),
                   child: Text(
-                    "Try Me With a (Hard) Sudoku ;)",
+                    "Try Me With a (Hard) Sudoku ;)", // Updated text
                     style: TextStyle(
-                      color: Colors.yellowAccent,
+                      color: Theme.of(context).colorScheme.secondary, // Yellow text color
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins', // Use the Poppins font from Google Fonts
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -43,7 +44,7 @@ class CameraDesign extends StatelessWidget {
                 Container(
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: Colors.yellowAccent, // Yellow border
+                      color: Theme.of(context).colorScheme.secondary, // Yellow border color
                       width: 4, // Border thickness
                     ),
                   ),
@@ -63,8 +64,7 @@ class CameraDesign extends StatelessWidget {
                                 angle: math.pi / 2, // Rotate 90 degrees clockwise
                                 child: SizedBox(
                                   width: squareSize,
-                                  height: squareSize /
-                                      controller.value.aspectRatio,
+                                  height: squareSize / controller.value.aspectRatio,
                                   child: CameraPreview(controller),
                                 ),
                               ),
@@ -78,7 +78,7 @@ class CameraDesign extends StatelessWidget {
                         size: Size(squareSize, squareSize),
                         painter: GridPainter(
                           gridLines: gridLines,
-                          color: Colors.yellow.withOpacity(0.8), // Yellow grid
+                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.8), // Yellow grid
                         ),
                       ),
                     ],

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:sudoku_solver_android/take_picture_screen.dart';
-import 'camera_service.dart'; // Import the camera page
+import 'package:google_fonts/google_fonts.dart';
+
+// Define beige globally so it can be used everywhere
+const Color beige = Color.fromARGB(255, 161, 140, 124);
 
 Future<void> main() async {
   // Ensure that plugin services are initialized so that `availableCameras()` can be called before `runApp()`
@@ -15,7 +18,26 @@ Future<void> main() async {
 
   runApp(
     MaterialApp(
-      theme: ThemeData.dark(),
+      theme: ThemeData(
+        primaryColor: beige, // Use the globally defined beige color
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: beige,
+          primary: beige,
+          secondary: const Color.fromARGB(255, 255, 214, 79), // Accent color
+        ),
+        scaffoldBackgroundColor: beige, // Background color for all screens
+        textTheme: GoogleFonts.poppinsTextTheme().copyWith(
+    // Customizing specific text styles
+    titleLarge: TextStyle(
+      color: const Color.fromARGB(255, 255, 214, 79), // Yellow for important text
+      fontSize: 24,
+      fontWeight: FontWeight.bold,
+          ),
+          bodyMedium: TextStyle(
+            color: Colors.black, // Ensures readability on beige
+          ),
+        ),
+      ),
       home: HomePage(camera: firstCamera), // HomePage is now the starting point
     ),
   );
