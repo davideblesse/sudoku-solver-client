@@ -74,11 +74,12 @@ class _EditRecognizedDigitsScreenState extends State<EditRecognizedDigitsScreen>
               .map((e) => int.parse(e))
               .toList();
 
-          Navigator.of(context).push(
+          Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => SudokuSolutionScreen(solution: solution),
             ),
           );
+
         } else {
           _showErrorSnackBar('Failed to retrieve solution.');
         }

@@ -10,15 +10,27 @@ class CameraManager {
     await _initializeControllerFuture;
   }
   
-  CameraController get controller => _controller;
+CameraController get controller {
+  if (!_controller.value.isInitialized) {
+    throw Exception("Camera is not initialized");
+  }
+  return _controller;
+}
   
   Future<void> get initializationFuture => _initializeControllerFuture;
   
-  Future<XFile> captureImage() async {
-    return await _controller.takePicture();
+Future<XFile> captureImage() async {
+  await _initializeControllerFuture; // Ensure initialization is completed
+  if (!_controller.value.isInitialized || _controller.value.isTakingPicture) {
+    throw Exception("Camera is not ready");
   }
+  return await _controller.takePicture();
+}
+
   
   void dispose() {
-    _controller.dispose();
+    if (_controller.value.isInitialized) {
+      _controller.dispose();
+    }
   }
 }

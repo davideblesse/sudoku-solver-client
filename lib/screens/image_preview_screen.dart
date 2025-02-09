@@ -53,11 +53,12 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen>
     setState(() => _isProcessing = false);
 
     if (recognizedDigits != null) {
-      Navigator.of(context).push(
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => EditRecognizedDigitsScreen(digits: recognizedDigits),
         ),
       );
+
     } else {
       _showErrorSnackBar('Failed to recognize digits.');
     }

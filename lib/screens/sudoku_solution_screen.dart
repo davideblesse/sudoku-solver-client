@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
 import 'main_menu_screen.dart';
 
 class SudokuSolutionScreen extends StatelessWidget {
   final List<int> solution;
 
   const SudokuSolutionScreen({Key? key, required this.solution}) : super(key: key);
+
+  Future<void> _restartApp(BuildContext context) async {
+    // Reinitialize available cameras
+    final cameras = await availableCameras();
+
+    // Navigate to MainMenuScreen and remove all previous screens
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) => MainMenuScreen(camera: cameras.isNotEmpty ? cameras.first : null),
+      ),
+      (route) => false, // Clears the navigation stack
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,11 +111,7 @@ class SudokuSolutionScreen extends StatelessWidget {
             const SizedBox(height: 20),
             // ✅ "Try Another Sudoku" Button
             ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => MainMenuScreen()),
-                );
-              },
+              onPressed: () => _restartApp(context), // Call restart method
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white.withOpacity(0.3),
                 foregroundColor: Colors.white,
