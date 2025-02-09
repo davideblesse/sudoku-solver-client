@@ -1,4 +1,4 @@
-# sudoku_solver_android
+# flutter_application_1
 
 A new Flutter project.
 
