@@ -87,7 +87,7 @@ class _MainMenuScreenState extends State<MainMenuScreen>
             children: [
               // Logo with subtle fade effect
               AnimatedOpacity(
-                opacity: 0.15,
+                opacity: 0.5,
                 duration: const Duration(seconds: 2),
                 child: Image.asset(
                   'assets/ss_logo_nobg.png',

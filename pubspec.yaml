@@ -1,5 +1,5 @@
 name: sudoku_solver_client_2
-description: "A new Flutter project."
+description: "Sudoku Solver - A Flutter-based Sudoku solving application."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -8,6 +8,7 @@ environment:
   sdk: ^3.5.4
 
 dependencies:
+  image: ^4.1.3
   camera: ^0.11.1
   cupertino_icons: ^1.0.8
   flutter:
@@ -23,7 +24,7 @@ dev_dependencies:
   flutter_lints: ^4.0.0
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.13.1  # Updated to correct key
+  flutter_launcher_icons: ^0.13.1
 
 flutter_launcher_icons:
   android: true
@@ -31,12 +32,14 @@ flutter_launcher_icons:
   image_path: "assets/ss_logo_purple.png"
   remove_alpha_ios: true
 
+flutter_launcher_name:
+  name: "Sudoku Solver"
 
 flutter:
   assets:
     - assets/sudoku_solver_logo.png
     - assets/ss_logo_nobg.png
-    - assets/ss_logo_big.jpg  # Ensure this is included
-    - assets/ss_logo_purple.png  # Ensure this is included
+    - assets/ss_logo_big.jpg
+    - assets/ss_logo_purple.png
 
   uses-material-design: true
