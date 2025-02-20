@@ -3,6 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'sudoku_solution_screen.dart';
 
+// Change this to true when testing locally on macOS/iOS Simulator (http://127.0.0.1:8000)
+// or on Android emulator using http://10.0.2.2:8000.
+const bool useLocalServer = false;
+
+// Local Docker server address (assuming you exposed port 8000 in your container).
+// If you're using the Android emulator, replace '127.0.0.1' with '10.0.2.2'.
+const String localApi = "http://192.168.1.248:8000";
+
+// Existing online server URL:
+const String remoteApi = 'https://sudoku-solver-from-image.onrender.com/solve-sudoku';
+
 class EditRecognizedDigitsScreen extends StatefulWidget {
   final List<int> digits;
 
@@ -10,11 +21,12 @@ class EditRecognizedDigitsScreen extends StatefulWidget {
       : super(key: key);
 
   @override
-  _EditRecognizedDigitsScreenState createState() => _EditRecognizedDigitsScreenState();
+  _EditRecognizedDigitsScreenState createState() =>
+      _EditRecognizedDigitsScreenState();
 }
 
-class _EditRecognizedDigitsScreenState extends State<EditRecognizedDigitsScreen>
-    with SingleTickerProviderStateMixin {
+class _EditRecognizedDigitsScreenState
+    extends State<EditRecognizedDigitsScreen> with SingleTickerProviderStateMixin {
   late List<int> updatedDigits;
   bool _isProcessing = false;
   late final AnimationController _backgroundAnimationController;
@@ -34,7 +46,10 @@ class _EditRecognizedDigitsScreenState extends State<EditRecognizedDigitsScreen>
       begin: Colors.black,
       end: Colors.deepPurpleAccent,
     ).animate(
-      CurvedAnimation(parent: _backgroundAnimationController, curve: Curves.easeInOut),
+      CurvedAnimation(
+        parent: _backgroundAnimationController,
+        curve: Curves.easeInOut,
+      ),
     );
 
     _backgroundAnimationController.forward();
@@ -50,7 +65,10 @@ class _EditRecognizedDigitsScreenState extends State<EditRecognizedDigitsScreen>
     if (_isProcessing) return;
     setState(() => _isProcessing = true);
 
-    final Uri url = Uri.parse('https://sudoku-solver-from-image.onrender.com/solve-sudoku');
+    // Decide which server URL to use
+    final Uri url = Uri.parse(useLocalServer ? localApi : remoteApi);
+
+    // Convert digits to string
     final String digitsString = updatedDigits.map((e) => e.toString()).join('');
 
     if (updatedDigits.length != 81 || digitsString.length != 81) {
@@ -80,7 +98,6 @@ class _EditRecognizedDigitsScreenState extends State<EditRecognizedDigitsScreen>
               builder: (context) => SudokuSolutionScreen(solution: solution),
             ),
           );
-
         } else {
           _showErrorSnackBar('Failed to retrieve solution.');
         }
@@ -88,7 +105,7 @@ class _EditRecognizedDigitsScreenState extends State<EditRecognizedDigitsScreen>
         _showErrorSnackBar('Error: ${response.statusCode}');
       }
     } catch (e) {
-      _showErrorSnackBar('Failed to send digits.');
+      _showErrorSnackBar('Failed to send digits: $e');
     } finally {
       setState(() => _isProcessing = false);
     }
@@ -146,18 +163,16 @@ class _EditRecognizedDigitsScreenState extends State<EditRecognizedDigitsScreen>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            
-            // Sudoku Grid
+
+            // Sudoku Grid using nested subgrids
             Expanded(
               child: Center(
                 child: AspectRatio(
                   aspectRatio: 1,
                   child: Container(
+                    padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.7),
-                        width: 2, // Same as SudokuSolutionScreen
-                      ),
+                      border: Border.all(color: Colors.white.withOpacity(0.7), width: 2),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -167,52 +182,82 @@ class _EditRecognizedDigitsScreenState extends State<EditRecognizedDigitsScreen>
                         ),
                       ],
                     ),
-                    child: GridView.builder(
-                      padding: const EdgeInsets.all(8),
-                      itemCount: 81,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 9,
-                        crossAxisSpacing: 2,
-                        mainAxisSpacing: 2,
-                      ),
-                      itemBuilder: (context, index) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.6),
-                              width: 1, // Matches solution screen
-                            ),
-                          ),
-                          child: TextFormField(
-                            initialValue: updatedDigits[index] == 0 ? '' : updatedDigits[index].toString(),
-                            textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
-                            maxLength: 1,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            decoration: const InputDecoration(
-                              counterText: '',
-                              border: InputBorder.none,
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                if (index >= 0 && index < 81) {
-                                  if (value.isEmpty || !RegExp(r'^[1-9]$').hasMatch(value)) {
-                                    updatedDigits[index] = 0;
-                                  } else {
-                                    updatedDigits[index] = int.parse(value);
-                                  }
-                                }
-                              });
-                            },
+                    child: Column(
+                      children: List.generate(3, (subgridRow) {
+                        return Expanded(
+                          child: Row(
+                            children: List.generate(3, (subgridCol) {
+                              final int startRow = subgridRow * 3;
+                              final int startCol = subgridCol * 3;
+                              return Expanded(
+                                child: Container(
+                                  margin: const EdgeInsets.all(1),
+                                  decoration: BoxDecoration(
+                                    // Subtle border to distinguish each subgrid
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.7),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: GridView.builder(
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    padding: EdgeInsets.zero,
+                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                      crossAxisSpacing: 1,
+                                      mainAxisSpacing: 1,
+                                    ),
+                                    itemCount: 9,
+                                    itemBuilder: (context, cellIndex) {
+                                      final int subRow = cellIndex ~/ 3;
+                                      final int subCol = cellIndex % 3;
+                                      final int fullRow = startRow + subRow;
+                                      final int fullCol = startCol + subCol;
+                                      final int fullIndex = fullRow * 9 + fullCol;
+
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors.white.withOpacity(0.5),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: TextFormField(
+                                          initialValue: updatedDigits[fullIndex] == 0
+                                              ? ''
+                                              : updatedDigits[fullIndex].toString(),
+                                          textAlign: TextAlign.center,
+                                          keyboardType: TextInputType.number,
+                                          maxLength: 1,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          decoration: const InputDecoration(
+                                            counterText: '',
+                                            border: InputBorder.none,
+                                          ),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              if (value.isEmpty ||
+                                                  !RegExp(r'^[1-9]$').hasMatch(value)) {
+                                                updatedDigits[fullIndex] = 0;
+                                              } else {
+                                                updatedDigits[fullIndex] = int.parse(value);
+                                              }
+                                            });
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              );
+                            }),
                           ),
                         );
-                      },
+                      }),
                     ),
                   ),
                 ),

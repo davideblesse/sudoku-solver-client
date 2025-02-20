@@ -117,17 +117,18 @@ class _AuthScreenState extends State<AuthScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // App Logo (Optional)
+                // App Logo (Scales Based on Screen Size)
                 AnimatedOpacity(
                   opacity: 0.9,
                   duration: const Duration(seconds: 2),
                   child: Image.asset(
                     'assets/ss_logo_nobg.png',
-                    width: 120,
-                    height: 120,
+                    width: MediaQuery.of(context).size.width * 0.4, // 40% of screen width
+                    height: MediaQuery.of(context).size.width * 0.4, // Keep square aspect ratio
                     fit: BoxFit.contain,
                   ),
                 ),
+
                 const SizedBox(height: 20),
 
                 // Auth Card

@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img; // Added for image processing
 import '../services/sudoku_api_service.dart';
 import 'edit_recognized_digits_screen.dart';
 
@@ -48,19 +50,56 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen>
 
   Future<void> _processImage() async {
     setState(() => _isProcessing = true);
+    try {
+      // Read the captured image file
+      final bytes = await File(widget.imagePath).readAsBytes();
+      // Decode the image
+      final originalImage = img.decodeImage(Uint8List.fromList(bytes));
+      if (originalImage == null) {
+        throw Exception("Failed to decode image.");
+      }
 
-    final recognizedDigits = await _apiService.sendImageForProcessing(widget.imagePath);
+      // Calculate square size for cropping
+      final cropSize = originalImage.width < originalImage.height
+          ? originalImage.width
+          : originalImage.height;
+      final offsetX = (originalImage.width - cropSize) ~/ 2;
+      final offsetY = (originalImage.height - cropSize) ~/ 2;
 
-    setState(() => _isProcessing = false);
-
-    if (recognizedDigits != null) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => EditRecognizedDigitsScreen(digits: recognizedDigits),
-        ),
+      // Corrected usage of copyCrop
+      final croppedImage = img.copyCrop(
+        originalImage,
+        x: offsetX,
+        y: offsetY,
+        width: cropSize,
+        height: cropSize,
       );
-    } else {
-      _showErrorSnackBar('Failed to recognize digits.');
+
+      // Encode the cropped image back to JPEG
+      final croppedBytes = img.encodeJpg(croppedImage);
+
+      // Save the cropped image to a temporary file
+      final tempDir = Directory.systemTemp;
+      final croppedFile = await File('${tempDir.path}/cropped_sudoku.jpg')
+          .writeAsBytes(croppedBytes);
+
+      // Send the cropped image to the server
+      final recognizedDigits = await _apiService.sendImageForProcessing(croppedFile.path);
+
+      setState(() => _isProcessing = false);
+
+      if (recognizedDigits != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => EditRecognizedDigitsScreen(digits: recognizedDigits),
+          ),
+        );
+      } else {
+        _showErrorSnackBar('Failed to recognize digits.');
+      }
+    } catch (e) {
+      setState(() => _isProcessing = false);
+      _showErrorSnackBar('Error processing image: $e');
     }
   }
 
@@ -104,8 +143,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen>
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Image preview in a card with a subtle elevation
+              // Image preview in a card with subtle elevation
               Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -127,7 +165,6 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen>
                 ),
               ),
               const SizedBox(height: 20),
-
               // Show a loading indicator when processing
               if (_isProcessing)
                 const Column(
@@ -144,8 +181,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen>
           ),
         ),
       ),
-      
-      // Floating Button (Now Styled as a Full-Width Button)
+      // Full-width button to process and send the image
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30),
         child: SizedBox(
