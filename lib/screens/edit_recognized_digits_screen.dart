@@ -6,7 +6,8 @@ import 'sudoku_solution_screen.dart';
 class EditRecognizedDigitsScreen extends StatefulWidget {
   final List<int> digits;
 
-  const EditRecognizedDigitsScreen({Key? key, required this.digits}) : super(key: key);
+  const EditRecognizedDigitsScreen({Key? key, required this.digits})
+      : super(key: key);
 
   @override
   _EditRecognizedDigitsScreenState createState() => _EditRecognizedDigitsScreenState();
@@ -145,71 +146,108 @@ class _EditRecognizedDigitsScreenState extends State<EditRecognizedDigitsScreen>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
+            
+            // Sudoku Grid
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 9,
-                    crossAxisSpacing: 1.5,
-                    mainAxisSpacing: 1.5,
+              child: Center(
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.7),
+                        width: 2, // Same as SudokuSolutionScreen
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: GridView.builder(
+                      padding: const EdgeInsets.all(8),
+                      itemCount: 81,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 9,
+                        crossAxisSpacing: 2,
+                        mainAxisSpacing: 2,
+                      ),
+                      itemBuilder: (context, index) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.6),
+                              width: 1, // Matches solution screen
+                            ),
+                          ),
+                          child: TextFormField(
+                            initialValue: updatedDigits[index] == 0 ? '' : updatedDigits[index].toString(),
+                            textAlign: TextAlign.center,
+                            keyboardType: TextInputType.number,
+                            maxLength: 1,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            decoration: const InputDecoration(
+                              counterText: '',
+                              border: InputBorder.none,
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                if (index >= 0 && index < 81) {
+                                  if (value.isEmpty || !RegExp(r'^[1-9]$').hasMatch(value)) {
+                                    updatedDigits[index] = 0;
+                                  } else {
+                                    updatedDigits[index] = int.parse(value);
+                                  }
+                                }
+                              });
+                            },
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                  itemCount: 81,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.4),
-                        ),
-                      ),
-                      child: TextFormField(
-                        initialValue: updatedDigits[index] == 0 ? '' : updatedDigits[index].toString(),
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        maxLength: 1,
-                        style: const TextStyle(color: Colors.white, fontSize: 20),
-                        decoration: const InputDecoration(
-                          counterText: '',
-                          border: InputBorder.none,
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            if (index >= 0 && index < 81) {
-                              if (value.isEmpty || !RegExp(r'^[1-9]$').hasMatch(value)) {
-                                updatedDigits[index] = 0;
-                              } else {
-                                updatedDigits[index] = int.parse(value);
-                              }
-                            }
-                          });
-                        },
-                      ),
-                    );
-                  },
                 ),
               ),
             ),
+
             const SizedBox(height: 20),
+
+            // Submit Button
             _isProcessing
                 ? const CircularProgressIndicator(color: Colors.white)
-                : ElevatedButton(
-                    onPressed: _submitCorrections,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.3),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
+                : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 60,
+                      child: ElevatedButton.icon(
+                        onPressed: _submitCorrections,
+                        icon: const Icon(Icons.check, color: Colors.white),
+                        label: const Text(
+                          'Confirm & Solve',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.3),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          elevation: 5,
+                        ),
                       ),
-                      elevation: 5,
-                    ),
-                    child: const Text(
-                      'Submit Corrections',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
+
             const SizedBox(height: 40),
           ],
         ),

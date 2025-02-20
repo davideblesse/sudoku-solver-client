@@ -26,6 +26,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires access to the camera to take photos and scan Sudoku puzzles.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires access to the microphone to enable audio-based interactions.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app requires access to save images to your photo library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to your photo library to select images for Sudoku processing.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -45,19 +53,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-
-	<!-- Privacy Permissions (Required) -->
-	<key>NSCameraUsageDescription</key>
-	<string>This app requires access to the camera to take photos and scan Sudoku puzzles.</string>
-
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app requires access to your photo library to select images for Sudoku processing.</string>
-
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This app requires access to the microphone to enable audio-based interactions.</string>
-
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>This app requires access to save images to your photo library.</string>
-
 </dict>
 </plist>

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'screens/splash_screen.dart';
+import 'screens/auth_screen.dart';
+import 'screens/main_menu_screen.dart';
 
 const Color primaryColor = Colors.red;
 const Color secondaryColor = Colors.white;
@@ -31,7 +33,12 @@ class MySudokuSolverApp extends StatelessWidget {
         fontFamily: 'Arial',
       ),
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(cameras: cameras),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => SplashScreen(cameras: cameras),
+        '/auth': (context) => const AuthScreen(),
+        '/main-menu': (context) => MainMenuScreen(camera: cameras.isNotEmpty ? cameras.first : null),
+      },
     );
   }
 }

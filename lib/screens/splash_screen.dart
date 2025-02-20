@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'main_menu_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   final List<CameraDescription> cameras;
@@ -36,30 +35,19 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
 
-    // Animated background color change
     _backgroundAnimation = ColorTween(
       begin: Colors.black,
       end: Colors.deepPurpleAccent,
-    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
     _animationController.forward();
-    Future.delayed(const Duration(seconds: 3), _navigateToMainMenu);
+    Future.delayed(const Duration(seconds: 3), _navigateToAuth);
   }
 
-  void _navigateToMainMenu() {
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (_, __, ___) => MainMenuScreen(
-          camera: widget.cameras.isNotEmpty ? widget.cameras.first : null,
-        ),
-        transitionsBuilder: (_, animation, __, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
-        },
-      ),
-    );
+  void _navigateToAuth() {
+    Navigator.of(context).pushReplacementNamed('/auth');
   }
 
   @override
@@ -95,23 +83,21 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ✅ Enlarged logo
               ScaleTransition(
                 scale: _scaleAnimation,
                 child: Image.asset(
                   'assets/ss_logo_nobg.png',
-                  width: screenWidth * 0.9, // Bigger logo
-                  height: screenHeight * 0.4, // Ensures proper scaling
+                  width: screenWidth * 0.9,
+                  height: screenHeight * 0.4,
                   fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(height: 30),
-              // ✅ Centered text with fade animation
               FadeTransition(
                 opacity: _fadeAnimation,
                 child: const Text(
                   'Capture & Solve Your Sudoku!',
-                  textAlign: TextAlign.center, // ✅ Centered text
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
