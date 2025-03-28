@@ -89,7 +89,7 @@ You point your phone at a Sudoku puzzle. The app finds the grid, reads the digit
 1. **Clone the Repo**
 
     ```bash
-    git clone https://github.com/your-username/sudoku-solver-client.git
+    git clone https://github.com/davideblesse/sudoku-solver-client.git
     cd sudoku-solver-client
     ```
 
